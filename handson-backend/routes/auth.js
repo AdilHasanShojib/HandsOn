@@ -1,86 +1,100 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const { body, validationResult } = require("express-validator");
-const db = require("../db");  // Import the database connection
+const db = require("../db"); // MySQL database connection
+require("dotenv").config();
 
 const router = express.Router();
 
-// User Signup Route
-router.post(
-  "/signup",
-  [
-    body("name").notEmpty().withMessage("Name is required"),
-    body("email").isEmail().withMessage("Valid email is required"),
-    body("password").isLength({ min: 6 }).withMessage("Password must be at least 6 characters"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+// Secret Key for JWT (from .env file)
+const JWT_SECRET = process.env.JWT_SECRET || "your_secret_key";
 
-    const { name, email, password, skills, causes } = req.body;
+// ✅ User Signup
+router.post("/signup", async (req, res) => {
+  const { name, email, password, skills, causes } = req.body;
 
-    try {
-      // Check if user already exists
-      const [existingUser] = await db.promise().query("SELECT * FROM users WHERE email = ?", [email]);
-      if (existingUser.length > 0) {
-        return res.status(400).json({ message: "Email already in use" });
-      }
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: "Please fill all required fields" });
+  }
+
+  try {
+    // Check if email is already registered
+    db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
+      if (err) return res.status(500).json({ message: "Database error" });
+      if (result.length > 0) return res.status(400).json({ message: "Email already exists" });
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Insert user into database
-      await db.promise().query("INSERT INTO users (name, email, password, skills, causes) VALUES (?, ?, ?, ?, ?)", 
-        [name, email, hashedPassword, skills, causes]);
-
-      res.status(201).json({ message: "User registered successfully" });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
-    }
+      // Insert new user into database
+      db.query(
+        "INSERT INTO users (name, email, password, skills, causes) VALUES (?, ?, ?, ?, ?)",
+        [name, email, hashedPassword, skills, causes],
+        (err, result) => {
+          if (err) return res.status(500).json({ message: "Error creating user" });
+          res.status(201).json({ message: "User registered successfully" });
+        }
+      );
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Server error" });
   }
-);
+});
 
-// User Login Route
-router.post(
-  "/login",
-  [
-    body("email").isEmail().withMessage("Valid email is required"),
-    body("password").notEmpty().withMessage("Password is required"),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
+// ✅ User Login
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
 
-    const { email, password } = req.body;
-
-    try {
-      // Check if user exists
-      const [user] = await db.promise().query("SELECT * FROM users WHERE email = ?", [email]);
-      if (user.length === 0) {
-        return res.status(400).json({ message: "Invalid email or password" });
-      }
-
-      // Compare password
-      const isMatch = await bcrypt.compare(password, user[0].password);
-      if (!isMatch) {
-        return res.status(400).json({ message: "Invalid email or password" });
-      }
-
-      // Generate JWT token
-      const token = jwt.sign({ userId: user[0].id }, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-      res.json({ token, user: { id: user[0].id, name: user[0].name, email: user[0].email } });
-    } catch (error) {
-      console.error(error);
-      res.status(500).json({ message: "Server error" });
-    }
+  if (!email || !password) {
+    return res.status(400).json({ message: "Please provide email and password" });
   }
-);
+
+  db.query("SELECT * FROM users WHERE email = ?", [email], async (err, result) => {
+    if (err) return res.status(500).json({ message: "Database error" });
+    if (result.length === 0) return res.status(401).json({ message: "Invalid email or password" });
+
+    const user = result[0];
+
+    // Compare hashed passwords
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
+
+    // Generate JWT token
+    const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
+
+    res.json({ token, message: "Login successful" });
+  });
+});
+
+// ✅ Get Logged-in User Details (Protected Route)
+router.get("/user", (req, res) => {
+  const token = req.headers.authorization?.split(" ")[1];
+
+  if (!token) return res.status(401).json({ message: "Unauthorized" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    db.query("SELECT id, name, email, skills, causes FROM users WHERE id = ?", [decoded.userId], (err, result) => {
+      if (err || result.length === 0) return res.status(404).json({ message: "User not found" });
+      res.json({ user: result[0] });
+    });
+  } catch {
+    res.status(401).json({ message: "Invalid token" });
+  }
+});
+
+// ✅ Middleware to Protect Routes
+const authenticateToken = (req, res, next) => {
+  const token = req.headers.authorization?.split(" ")[1];
+  if (!token) return res.status(401).json({ message: "Access denied" });
+
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.user = decoded.userId;
+    next();
+  } catch {
+    res.status(401).json({ message: "Invalid token" });
+  }
+};
 
 module.exports = router;
