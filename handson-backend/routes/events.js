@@ -136,7 +136,29 @@ router.get("/:eventId/attendees", (req, res) => {
 });
 
 
+// Remove an attendee from an event (Only event organizer can remove)
+router.delete("/:eventId/remove/:userId", authMiddleware, (req, res) => {
+    const { eventId, userId } = req.params;
+    const organizerId = req.user.userId; // Get logged-in user ID
 
+    // Check if the logged-in user is the event organizer
+    const checkOrganizerQuery = "SELECT created_by FROM events WHERE id = ?";
+    db.query(checkOrganizerQuery, [eventId], (err, results) => {
+        if (err) return res.status(500).json({ error: err.message });
+        if (results.length === 0) return res.status(404).json({ message: "Event not found" });
+        
+        if (results[0].created_by !== organizerId) {
+            return res.status(403).json({ message: "Unauthorized: Only event organizers can remove attendees" });
+        }
+
+        // Remove the attendee from the event_attendees table
+        const deleteQuery = "DELETE FROM event_attendees WHERE event_id = ? AND user_id = ?";
+        db.query(deleteQuery, [eventId, userId], (err, result) => {
+            if (err) return res.status(500).json({ error: err.message });
+            res.json({ message: "Attendee removed successfully!" });
+        });
+    });
+});
 
 
 

@@ -43,6 +43,21 @@ const EventDetails = () => {
         }
     };
 
+    const handleRemoveAttendee = async (userId) => {
+        try {
+            const config = { headers: { Authorization: `Bearer ${token}` } };
+            await axios.delete(`http://localhost:5000/api/events/${eventId}/remove/${userId}`, config);
+            alert("Attendee removed successfully!");
+            
+            // Refresh attendee list
+            axios.get(`http://localhost:5000/api/events/${eventId}/attendees`)
+                .then(res => setAttendees(res.data));
+        } catch (error) {
+            alert(error.response?.data?.message || "Error removing attendee");
+        }
+    };
+
+
     if (!event) return <p>Loading...</p>;
 
     return (
@@ -70,17 +85,28 @@ const EventDetails = () => {
             </button>
 
             <div className="mt-6 bg-gray-100 p-4 rounded-lg shadow-md">
-                <h2 className="text-xl font-bold mb-4">Attendees ({attendees.length})</h2>
-                {attendees.length > 0 ? (
-                    <ul>
-                        {attendees.map(attendee => (
-                            <li key={attendee.id} className="p-2 border-b">{attendee.name}</li>
-                        ))}
-                    </ul>
-                ) : (
-                    <p>No attendees yet.</p>
-                )}
-            </div>
+    <h2 className="text-xl font-bold mb-4">Attendees ({attendees.length})</h2>
+    {attendees.length > 0 ? (
+        <ul>
+            {attendees.map(attendee => (
+                <li key={attendee.id} className="p-2 border-b flex justify-between">
+                    {attendee.name} ({attendee.email})
+                    {event.created_by === Number(localStorage.getItem("userId")) && (
+                        <button 
+                            onClick={() => handleRemoveAttendee(attendee.id)} 
+                            className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
+                        >
+                            Remove
+                        </button>
+                    )}
+                </li>
+            ))}
+        </ul>
+    ) : (
+        <p>No attendees yet.</p>
+    )}
+</div>
+
         </div>
     );
 };
