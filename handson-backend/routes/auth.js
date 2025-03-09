@@ -62,7 +62,7 @@ router.post("/login", (req, res) => {
     // Generate JWT token
     const token = jwt.sign({ userId: user.id }, JWT_SECRET, { expiresIn: "1h" });
 
-    res.json({ token, message: "Login successful" });
+    res.json({ token, userId: user.id, message: "Login successful" });
   });
 });
 
@@ -83,18 +83,5 @@ router.get("/user", (req, res) => {
   }
 });
 
-// ✅ Middleware to Protect Routes
-const authenticateToken = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token) return res.status(401).json({ message: "Access denied" });
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded.userId;
-    next();
-  } catch {
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
 
 module.exports = router;

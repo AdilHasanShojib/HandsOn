@@ -63,8 +63,17 @@ const Dashboard = () => {
                 <h4 className="text-lg font-semibold text-gray-700">Beach Cleanup Drive</h4>
                 <p className="text-sm text-gray-500">Date: March 15, 2025</p>
               </div>
-              <button className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">View</button>
+              <button onClick={() => navigate("/events")} className="bg-indigo-500 text-white px-4 py-2 rounded-md hover:bg-indigo-600">
+               Browse Events</button>
             </div>
+
+            
+
+
+
+
+
+
           </div>
         </div>
       </div>

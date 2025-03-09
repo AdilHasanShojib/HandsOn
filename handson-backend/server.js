@@ -14,7 +14,10 @@ app.get("/", (req, res) => {
   res.send("HandsOn API is running...");
 });
 
+
+
 app.use("/api/auth", authRoutes);
+app.use("/api/events", require("./routes/events"));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
