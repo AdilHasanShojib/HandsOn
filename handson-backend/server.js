@@ -3,6 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const db = require("./db");
 const authRoutes = require("./routes/auth");
+const helpRequestsRoutes = require("./routes/helpRequests");
 
 dotenv.config();
 const app = express();
@@ -14,6 +15,7 @@ app.get("/", (req, res) => {
   res.send("HandsOn API is running...");
 });
 
+app.use("/api/help-requests", helpRequestsRoutes); 
 
 
 app.use("/api/auth", authRoutes);
