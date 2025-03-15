@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const db = require("./db");
 const authRoutes = require("./routes/auth");
 const helpRequestsRoutes = require("./routes/helpRequests");
+const messagesRoutes = require("./routes/messages");
 
 dotenv.config();
 const app = express();
@@ -16,6 +17,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/help-requests", helpRequestsRoutes); 
+
+
+
+app.use("/api/messages", messagesRoutes);
 
 
 app.use("/api/auth", authRoutes);

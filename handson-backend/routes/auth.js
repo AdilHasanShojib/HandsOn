@@ -66,6 +66,7 @@ router.post("/login", (req, res) => {
   });
 });
 
+
 // ✅ Get Logged-in User Details (Protected Route)
 router.get("/user", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];

@@ -7,6 +7,7 @@ import EventList from "./components/EventList";
 import EventDetails from "./components/EventDetails";
 import CreateEvent from "./components/CreateEvent";
 import HelpRequests from "./components/HelpRequests";
+import Messaging from "./components/Messaging";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/events/:id" element={<EventDetails />} />
         <Route path="/create-event" element={<CreateEvent />} />
         <Route path="/help-request" element={<HelpRequests />} />
+        <Route path="/message" element={<Messaging />} />
 
 
       </Routes>
