@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
-import Messaging from "./Messaging";
+import { useNavigate } from "react-router-dom";
 
 const HelpRequests = () => {
     const [requests, setRequests] = useState([]);
     const [selectedRequest, setSelectedRequest] = useState(null);
     const [responses, setResponses] = useState([]);
     const [newResponse, setNewResponse] = useState("");
-    const [selectedResponder, setSelectedResponder] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchRequests();
@@ -32,22 +32,8 @@ const HelpRequests = () => {
         }
     };
 
-    const handleSubmitResponse = async () => {
-        if (!newResponse.trim()) return;
-
-        try {
-            const token = localStorage.getItem("token");
-            const config = { headers: { Authorization: `Bearer ${token}` } };
-            await axios.post(
-                `http://localhost:5000/api/help-requests/${selectedRequest}/respond`,
-                { response: newResponse },
-                config
-            );
-            setNewResponse("");
-            handleViewResponses(selectedRequest); // Refresh responses
-        } catch (error) {
-            console.error("Error submitting response", error);
-        }
+    const handleSendMessage = (responderId, responderName) => {
+        navigate(`/message/${selectedRequest}/${responderId}/${responderName}`);
     };
 
     return (
@@ -83,7 +69,7 @@ const HelpRequests = () => {
                                         <strong>{res.responder}:</strong> {res.response}
                                     </span>
                                     <button 
-                                        onClick={() => setSelectedResponder({ id: res.user_id, name: res.responder })}
+                                        onClick={() => handleSendMessage(res.user_id, res.responder)}
                                         className="bg-blue-600 text-white px-2 py-1 rounded hover:bg-blue-700"
                                     >
                                         Message
@@ -103,21 +89,12 @@ const HelpRequests = () => {
                         onChange={(e) => setNewResponse(e.target.value)}
                     ></textarea>
                     <button 
-                        onClick={handleSubmitResponse} 
+                        onClick={handleViewResponses} 
                         className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
                     >
                         Submit Response
                     </button>
                 </div>
-            )}
-
-            {/* Messaging Section */}
-            {selectedResponder && (
-                <Messaging 
-                    helpRequestId={selectedRequest} 
-                    receiverId={selectedResponder.id} 
-                    receiverName={selectedResponder.name} 
-                />
             )}
         </div>
     );

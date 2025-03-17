@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
-const Messaging = ({ helpRequestId, receiverId, receiverName }) => {
+const Messaging = () => {
+    const { helpRequestId, receiverId, receiverName } = useParams();
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState("");
     const userId = localStorage.getItem("userId");
@@ -11,13 +13,19 @@ const Messaging = ({ helpRequestId, receiverId, receiverName }) => {
     }, [helpRequestId, receiverId]);
 
     const fetchMessages = async () => {
+        if (!helpRequestId || !receiverId) {
+            console.error("helpRequestId or receiverId is missing");
+            return;
+        }
+
         try {
             const token = localStorage.getItem("token");
             const config = { headers: { Authorization: `Bearer ${token}` } };
+
             const res = await axios.get(`http://localhost:5000/api/messages/${helpRequestId}/${receiverId}`, config);
             setMessages(res.data);
         } catch (error) {
-            console.error("Error fetching messages", error);
+            console.error("Error fetching messages:", error);
         }
     };
 
@@ -45,11 +53,27 @@ const Messaging = ({ helpRequestId, receiverId, receiverName }) => {
             <div className="h-60 overflow-y-auto border p-2 mt-2">
                 {messages.length > 0 ? (
                     messages.map((msg) => (
-                        <div key={msg.id} className={`p-2 mb-2 ${msg.sender_id === Number(userId) ? "text-right" : "text-left"}`}>
-                            <p className="inline-block bg-gray-200 rounded px-3 py-1">
-                                <strong>{msg.sender_name}:</strong> {msg.message}
-                            </p>
-                        </div>
+                        
+
+<div key={msg.id} className={`p-2 mb-2 ${msg.sender_id === Number(userId) ? "text-right" : "text-left"}`}>
+<p className={`inline-block rounded px-3 py-1 ${msg.sender_id === Number(userId)? "bg-blue-200" : "bg-gray-200"}`}>
+<strong>{msg.sender_id === Number(userId) ? "You" : msg.sender_name}:</strong> {msg.message} 
+    
+</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
                     ))
                 ) : (
                     <p>No messages yet.</p>

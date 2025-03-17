@@ -5,6 +5,8 @@ const db = require("./db");
 const authRoutes = require("./routes/auth");
 const helpRequestsRoutes = require("./routes/helpRequests");
 const messagesRoutes = require("./routes/messages");
+const teamRoutes = require("./routes/teams");
+
 
 dotenv.config();
 const app = express();
@@ -21,7 +23,7 @@ app.use("/api/help-requests", helpRequestsRoutes);
 
 
 app.use("/api/messages", messagesRoutes);
-
+app.use("/api/teams", teamRoutes);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/events", require("./routes/events"));
