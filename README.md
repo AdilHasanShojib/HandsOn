@@ -72,23 +72,6 @@ Authentication: JWT, bcrypt
 
 Database Management: MySQL
 
-
-
-📂 Project Structure
-
-HandsOn/
-│── hands-on-backend/
-│   ├── routes/
-│   ├── middleware/
-│   ├── server.js
-│   ├── db.js
-│── hands-on-frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   ├── App.js
-│   │   ├── index.js
-│── README.md
-
 🔧 Installation & Setup
 
 Backend Setup
