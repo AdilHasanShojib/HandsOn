@@ -28,24 +28,36 @@ const TeamInvites = () => {
     };
 
     return (
-        <div>
-            <h2>Team Invites</h2>
+        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Team Invites</h2>
             {invites.length > 0 ? (
                 invites.map((invite) => (
-                    <div key={invite.id} className="border p-2 my-2">
-                        <p>You've been invited to join team #{invite.team_id}</p>
-                        <button onClick={() => handleAccept(invite.id)} className="bg-green-500 px-2 py-1 mr-2">
-                            Accept
-                        </button>
-                        <button onClick={() => handleDecline(invite.id)} className="bg-red-500 px-2 py-1">
-                            Decline
-                        </button>
+                    <div key={invite.id} className="border rounded-lg p-4 my-3 bg-gray-50">
+                        <p className="text-gray-700 text-center">
+                            You've been invited to join <span className="font-semibold">Team {invite.team_name}</span>
+                        </p>
+                        <div className="flex justify-center mt-3 space-x-4">
+                            <button
+                                onClick={() => handleAccept(invite.id)}
+                                className="bg-green-500 text-white px-4 py-2 rounded-md hover:bg-green-600 transition"
+                            >
+                                Accept
+                            </button>
+                            <button
+                                onClick={() => handleDecline(invite.id)}
+                                className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition"
+                            >
+                                Decline
+                            </button>
+                        </div>
                     </div>
                 ))
             ) : (
-                <p>No invites available.</p>
+                <p className="text-center text-gray-500">No invites available.</p>
             )}
         </div>
+       </div>
     );
 };
 

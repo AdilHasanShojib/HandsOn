@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth");
 const helpRequestsRoutes = require("./routes/helpRequests");
 const messagesRoutes = require("./routes/messages");
 const teamRoutes = require("./routes/teams");
+const dashboardRoutes = require("./routes/dashboard");
 
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.use("/api/messages", messagesRoutes);
 app.use("/api/teams", teamRoutes);
 
 app.use("/api/auth", authRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/events", require("./routes/events"));
 
 const PORT = process.env.PORT || 5000;

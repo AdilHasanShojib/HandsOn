@@ -108,6 +108,34 @@ router.get("/", authMiddleware, (req, res) => {
 });
 
 
+// ✅ Fetch invites for the logged-in user
+router.get("/invites", authMiddleware, async (req, res) => {
+    try {
+        const userId =req.user.userId; // Ensure user ID is extracted correctly
+
+        const query = `
+            SELECT team_invites.id, team_invites.team_id, teams.name AS team_name, team_invites.status
+            FROM team_invites
+            JOIN teams ON team_invites.team_id = teams.id
+            WHERE team_invites.receiver_id = ? AND team_invites.status = 'pending'
+        `;
+
+        db.query(query, [userId], (err, results) => {
+            if (err) {
+                console.error("Database Error:", err);
+                return res.status(500).json({ error: err.message });
+            }
+
+            if (results.length === 0) {
+                return res.status(404).json({ error: "No invites found" });
+            }
+
+            res.json(results);
+        });
+    } catch (error) {
+        res.status(500).json({ error: "Server error" });
+    }
+});
 
 
 
@@ -171,29 +199,40 @@ router.post("/:team_id/invite", authMiddleware, (req, res) => {
 
     if (!sender_id) return res.status(403).json({ error: "Unauthorized request" });
 
-    // Check if the team exists & is private
-    const teamCheckQuery = `SELECT is_private FROM teams WHERE id = ?`;
+    // Check if the sender is the team owner
+    const teamCheckQuery = `SELECT created_by, is_private FROM teams WHERE id = ?`;
     db.query(teamCheckQuery, [team_id], (err, teamResult) => {
         if (err) return res.status(500).json({ error: err.message });
         if (teamResult.length === 0) return res.status(404).json({ error: "Team not found" });
-        if (!teamResult[0].is_private) return res.status(400).json({ error: "This team is public, no invite needed." });
 
-        // Check if the sender is a member of the team
-        const memberCheckQuery = `SELECT * FROM team_members WHERE team_id = ? AND user_id = ?`;
-        db.query(memberCheckQuery, [team_id, sender_id], (err, memberResult) => {
-            if (err) return res.status(500).json({ error: err.message });
-            if (memberResult.length === 0) return res.status(403).json({ error: "Only team members can send invites." });
-            
-            // Function to process the invite after resolving user_id
-            const processInvite = (receiver_id) => {
-                if (!receiver_id) return res.status(400).json({ error: "Invalid user ID or email." });
-                
+        const { created_by, is_private } = teamResult[0];
+
+        // Ensure the sender is the team owner
+        if (sender_id !== created_by) {
+            return res.status(403).json({ error: "Only the team owner can send invites." });
+        }
+
+        // If the team is public, no invite is needed
+        if (!is_private) {
+            return res.status(400).json({ error: "This team is public, no invite needed." });
+        }
+
+        // Function to process the invite after resolving user_id
+        const processInvite = (receiver_id) => {
+            if (!receiver_id) return res.status(400).json({ error: "Invalid user ID or email." });
+
+            // Ensure the receiver_id exists in the users table
+            const checkUserQuery = `SELECT id FROM users WHERE id = ?`;
+            db.query(checkUserQuery, [receiver_id], (err, userResult) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (userResult.length === 0) return res.status(404).json({ error: "User not found in database." });
+
                 // Check if an invite already exists
                 const inviteExistsQuery = `SELECT * FROM team_invites WHERE team_id = ? AND receiver_id = ? AND status = 'pending'`;
                 db.query(inviteExistsQuery, [team_id, receiver_id], (err, inviteResult) => {
                     if (err) return res.status(500).json({ error: err.message });
                     if (inviteResult.length > 0) return res.status(400).json({ error: "Invite already sent to this user." });
-                    
+
                     // Insert invite into the "team_invites" table
                     const inviteQuery = `INSERT INTO team_invites (team_id, sender_id, receiver_id, status) VALUES (?, ?, ?, 'pending')`;
                     db.query(inviteQuery, [team_id, sender_id, receiver_id], (err) => {
@@ -201,22 +240,27 @@ router.post("/:team_id/invite", authMiddleware, (req, res) => {
                         res.json({ message: "Invite sent successfully!" });
                     });
                 });
-            };
-            
-            // If email is provided, find user_id first
-            if (email) {
-                const emailQuery = `SELECT id FROM users WHERE email = ?`;
-                db.query(emailQuery, [email], (err, result) => {
-                    if (err) return res.status(500).json({ error: err.message });
-                    if (result.length === 0) return res.status(404).json({ error: "User not found" });
-                    processInvite(result[0].id);
-                });
-            } else {
-                processInvite(user_id);
-            }
-        });
+            });
+        };
+
+        // If email is provided, find user_id first
+        if (email) {
+            const emailQuery = `SELECT id FROM users WHERE email = ?`;
+            db.query(emailQuery, [email], (err, result) => {
+                if (err) return res.status(500).json({ error: err.message });
+                if (result.length === 0) return res.status(404).json({ error: "User not found" });
+                processInvite(result[0].id);
+            });
+        } else {
+            processInvite(user_id);
+        }
     });
 });
+
+
+
+
+
 
 
 // ✅ Accept invite & join private team
@@ -257,17 +301,5 @@ router.post("/invite/decline", authMiddleware, (req, res) => {
         res.json({ message: "Invite declined." });
     });
 });
-
-
-
-
-
-
-
-
-
-
-
-
 
 module.exports = router;

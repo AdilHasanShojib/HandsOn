@@ -10,6 +10,7 @@ import HelpRequests from "./components/HelpRequests";
 import Messaging from "./components/Messaging";
 import Teams from "./components/Teams";
 import TeamDashboard from "./components/TeamDashboard";
+import TeamInvites from "./components/TeamInvites";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
         <Route path="/message/:helpRequestId/:receiverId/:receiverName" element={<Messaging />} />
         <Route path="/teams" element={<Teams />} />
         <Route path="/team/:team_id" element={<TeamDashboard />} />
+        <Route path="/teams-invites" element={<TeamInvites />} />
 
 
       </Routes>
