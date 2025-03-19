@@ -10,7 +10,7 @@ router.get("/", authMiddleware, (req, res) => {
 
   // SQL Queries
   const eventsJoinedQuery = "SELECT COUNT(*) AS total FROM event_attendees WHERE user_id = ?";
-  const teamsQuery = "SELECT COUNT(*) AS total FROM team_invites WHERE receiver_id = ? AND status = 'accepted'";
+  const teamsQuery = "SELECT COUNT(*) AS total FROM team_members WHERE user_id = ?";
   const helpRequestsQuery = "SELECT COUNT(*) AS total FROM help_requests WHERE created_by = ?";
   const upcomingEventsQuery = "SELECT id, title, `date` FROM events ORDER BY date ASC LIMIT 5";
 

@@ -40,13 +40,14 @@ const Dashboard = () => {
     <div className="min-h-screen bg-gray-100">
       {/* Navbar */}
       <header className="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md">
-        <h1 className="text-xl font-bold">HandsOn</h1>
+        <h1 className="text-3xl font-bold">HandsOn</h1>
         <nav className="space-x-6">
-          <a href="/" className="hover:underline">Home</a>
-          <a href="/teams" className="hover:underline">Teams</a>
-          <a href="/invite" className="hover:underline">Invite</a>
-          <a href="/events" className="hover:underline">Events</a>
-          <a href="/help-requests" className="hover:underline">Help Requests</a>
+        <a href="/dashboard" className="font-bold hover:underline">Home</a>
+       <a href="/teams" className="font-bold hover:underline">Teams</a>
+       <a href="/teams-invites" className="font-bold hover:underline">Invite</a>
+       <a href="/events" className="font-bold hover:underline">Events</a>
+       <a href="/help-request" className="font-bold hover:underline">Help Requests</a>
+
         </nav>
         <button 
           onClick={() => { localStorage.removeItem("token"); navigate("/login"); }}
@@ -57,7 +58,7 @@ const Dashboard = () => {
       </header>
 
       {/* Dashboard Content */}
-      <div className="p-6 max-w-4xl mx-auto">
+      <div className="p-6 max-w-4xl mx-auto mt-12">
       <div className="flex items-center justify-between">
          <h2 className="text-5xl font-semibold text-gray-700">
              Welcome, {user ? user.name : "User"}!
@@ -71,29 +72,29 @@ const Dashboard = () => {
       </div>
 
 
-       <div className="grid grid-cols-3 gap-6 mt-6">
+       <div className="grid grid-cols-3 gap-6 mt-8">
           <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Total Events Joined</h3>
-            <p className="text-2xl font-bold text-indigo-600">
+            <h3 className="text-2xl font-bold mb-4 text-indigo-700">Total Events Joined</h3>
+            <p className="text-2xl font-bold text-center text-stone-950">
               {stats ? stats.totalEventsJoined : 0}
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Teams Participated</h3>
-            <p className="text-2xl font-bold text-indigo-600">
+            <h3 className="text-2xl font-bold mb-4 text-indigo-700">Teams Participated</h3>
+            <p className="text-2xl font-bold text-center text-stone-950">
               {stats ? stats.teamsParticipated : 0}
             </p>
           </div>
           <div className="bg-white p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold text-gray-700">Help Requests Created</h3>
-            <p className="text-2xl font-bold text-indigo-600">
+            <h3 className="text-2xl font-bold mb-4 text-indigo-700">Requests Created</h3>
+            <p className="text-2xl font-bold text-center text-stone-950">
               {stats ? stats.helpRequests : 0}
             </p>
           </div>
         </div>
 
         {/* Upcoming Events */}
-        <h3 className="text-xl font-semibold mt-6 text-gray-700">Upcoming Events</h3>
+        <h3 className="mt-8 text-2xl font-bold mb-4 text-indigo-700">Upcoming Events</h3>
         <div className="mt-4 space-y-4">
           {stats && stats.upcomingEvents.length > 0 ? (
             stats.upcomingEvents.map((event) => (

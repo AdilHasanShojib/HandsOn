@@ -32,6 +32,26 @@ const TeamDashboard = () => {
   };
 
   return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <header className="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md">
+        <h1 className="text-3xl font-bold">HandsOn</h1>
+        <nav className="space-x-6">
+        <a href="/dashboard" className="font-bold hover:underline">Home</a>
+       <a href="/teams" className="font-bold hover:underline">Teams</a>
+       <a href="/teams-invites" className="font-bold hover:underline">Invite</a>
+       <a href="/events" className="font-bold hover:underline">Events</a>
+       <a href="/help-request" className="font-bold hover:underline">Help Requests</a>
+
+        </nav>
+        <button 
+          onClick={() => { localStorage.removeItem("token"); navigate("/login"); }}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+        >
+          Logout
+        </button>
+      </header>
+      
     <div className="max-w-3xl mx-auto mt-8 p-4">
       {team ? (
         <>
@@ -55,6 +75,10 @@ const TeamDashboard = () => {
         <p>Loading team details...</p>
       )}
     </div>
+    </div>
+
+
+
   );
 };
 

@@ -3,42 +3,89 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 const HelpRequests = () => {
-    const [requests, setRequests] = useState([]);
-    const [selectedRequest, setSelectedRequest] = useState(null);
-    const [responses, setResponses] = useState([]);
-    const [newResponse, setNewResponse] = useState("");
-    const navigate = useNavigate();
+  const [requests, setRequests] = useState([]);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [responses, setResponses] = useState([]);
+  const [newResponse, setNewResponse] = useState("");
+  const navigate = useNavigate();
 
-    useEffect(() => {
-        fetchRequests();
-    }, []);
+  useEffect(() => {
+    fetchRequests();
+}, []);
 
-    const fetchRequests = async () => {
-        try {
-            const res = await axios.get("http://localhost:5000/api/help-requests");
-            setRequests(res.data);
-        } catch (error) {
-            console.error("Error fetching help requests", error);
-        }
-    };
+const fetchRequests = async () => {
+    try {
+        const res = await axios.get("http://localhost:5000/api/help-requests");
+        setRequests(res.data);
+    } catch (error) {
+        console.error("Error fetching help requests", error);
+    }
+};
 
-    const handleViewResponses = async (requestId) => {
-        setSelectedRequest(requestId);
-        try {
-            const res = await axios.get(`http://localhost:5000/api/help-requests/${requestId}/responses`);
-            setResponses(res.data);
-        } catch (error) {
-            console.error("Error fetching responses", error);
-        }
-    };
+const handleViewResponses = async (requestId) => {
+    setSelectedRequest(requestId);
+    try {
+        const res = await axios.get(`http://localhost:5000/api/help-requests/${requestId}/responses`);
+        setResponses(res.data);
+    } catch (error) {
+        console.error("Error fetching responses", error);
+    }
+};
 
-    const handleSendMessage = (responderId, responderName) => {
-        navigate(`/message/${selectedRequest}/${responderId}/${responderName}`);
-    };
+const handleSubmitResponse = async () => {
+    if (!newResponse.trim()) return alert("Response cannot be empty!");
 
-    return (
-        <div className="max-w-3xl mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-4">Community Help Requests</h1>
+    try {
+        const token = localStorage.getItem("token");
+        const config = { headers: { Authorization: `Bearer ${token}` } };
+        await axios.post(`http://localhost:5000/api/help-requests/${selectedRequest}/respond`, { response: newResponse }, config);
+        alert("Response submitted!");
+        setNewResponse("");
+        handleViewResponses(selectedRequest); // Refresh responses
+    } catch (error) {
+        alert(error.response?.data?.message || "Error submitting response");
+    }
+};
+
+
+const handleSendMessage = (responderId, responderName) => {
+    navigate(`/message/${selectedRequest}/${responderId}/${responderName}`);
+};
+
+  return (
+    <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <header className="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md">
+        <h1 className="text-3xl font-bold">HandsOn</h1>
+        <nav className="space-x-6">
+          <a href="/dashboard" className="font-bold hover:underline">
+            Home
+          </a>
+          <a href="/teams" className="font-bold hover:underline">
+            Teams
+          </a>
+          <a href="/teams-invites" className="font-bold hover:underline">
+            Invite
+          </a>
+          <a href="/events" className="font-bold hover:underline">
+            Events
+          </a>
+          <a href="/help-request" className="font-bold hover:underline">
+            Help Requests
+          </a>
+        </nav>
+        <button
+          onClick={() => {
+            localStorage.removeItem("token");
+            navigate("/login");
+          }}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+        >
+          Logout
+        </button>
+      </header>
+      <div className="max-w-3xl mx-auto p-6">
+            <h1 className="text-2xl font-bold mb-4 text-indigo-700">Community Help Requests</h1>
 
             {/* List of Help Requests */}
             {requests.map(req => (
@@ -59,7 +106,7 @@ const HelpRequests = () => {
 
             {/* Responses Section */}
             {selectedRequest && (
-                <div className="mt-6 p-4 border rounded shadow">
+                <div className="bg-teal-200 mt-6 p-4 border rounded shadow">
                     <h2 className="text-xl font-bold">Responses</h2>
                     {responses.length > 0 ? (
                         <ul>
@@ -89,7 +136,7 @@ const HelpRequests = () => {
                         onChange={(e) => setNewResponse(e.target.value)}
                     ></textarea>
                     <button 
-                        onClick={handleViewResponses} 
+                        onClick={handleSubmitResponse} 
                         className="mt-2 bg-green-600 text-white px-4 py-2 rounded"
                     >
                         Submit Response
@@ -97,7 +144,8 @@ const HelpRequests = () => {
                 </div>
             )}
         </div>
-    );
+    </div>
+  );
 };
 
 export default HelpRequests;

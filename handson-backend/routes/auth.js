@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const db = require("../db"); // MySQL database connection
+const authMiddleware = require("./middleware");
 require("dotenv").config();
 
 const router = express.Router();
@@ -67,6 +68,50 @@ router.post("/login", (req, res) => {
 });
 
 
+
+router.put("/update-profile", authMiddleware, (req, res) => {
+  const { name, skills, causes, password } = req.body;
+  const userId = req.user.userId;
+
+  let updateFields = { name, skills, causes };
+
+  if (password) {
+    bcrypt.genSalt(10, (err, salt) => {
+      if (err) {
+        console.error("Error generating salt:", err);
+        return res.status(500).json({ message: "Error updating password" });
+      }
+
+      bcrypt.hash(password, salt, (err, hashedPassword) => {
+        if (err) {
+          console.error("Error hashing password:", err);
+          return res.status(500).json({ message: "Error updating password" });
+        }
+
+        updateFields.password = hashedPassword;
+
+        db.query("UPDATE users SET ? WHERE id = ?", [updateFields, userId], (err, result) => {
+          if (err) {
+            console.error("Error updating profile:", err);
+            return res.status(500).json({ message: "Failed to update profile" });
+          }
+          res.json({ message: "Profile updated successfully!" });
+        });
+      });
+    });
+  } else {
+    db.query("UPDATE users SET ? WHERE id = ?", [updateFields, userId], (err, result) => {
+      if (err) {
+        console.error("Error updating profile:", err);
+        return res.status(500).json({ message: "Failed to update profile" });
+      }
+      res.json({ message: "Profile updated successfully!" });
+    });
+  }
+});
+
+
+
 // ✅ Get Logged-in User Details (Protected Route)
 router.get("/user", (req, res) => {
   const token = req.headers.authorization?.split(" ")[1];
@@ -83,6 +128,7 @@ router.get("/user", (req, res) => {
     res.status(401).json({ message: "Invalid token" });
   }
 });
+
 
 
 module.exports = router;

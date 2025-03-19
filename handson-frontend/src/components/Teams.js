@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { fetchTeams, createTeam, joinTeam, leaveTeam, sendInvite } from "../api";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+
 
 const Teams = () => {
     const [teams, setTeams] = useState([]);
@@ -8,6 +10,7 @@ const Teams = () => {
     const [showInviteModal, setShowInviteModal] = useState(false);
     const [inviteTeamId, setInviteTeamId] = useState(null);
     const [inviteUserId, setInviteUserId] = useState("");
+     const navigate = useNavigate();
 
     useEffect(() => {
         loadTeams();
@@ -68,10 +71,29 @@ const Teams = () => {
     };
 
     return (
-        <div className="max-w-4xl mx-auto mt-8 p-4">
-            <h2 className="text-2xl font-bold mb-4">Teams</h2>
+        <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <header className="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md">
+        <h1 className="text-3xl font-bold">HandsOn</h1>
+        <nav className="space-x-6">
+        <a href="/dashboard" className="font-bold hover:underline">Home</a>
+       <a href="/teams" className="font-bold hover:underline">Teams</a>
+       <a href="/teams-invites" className="font-bold hover:underline">Invite</a>
+       <a href="/events" className="font-bold hover:underline">Events</a>
+       <a href="/help-request" className="font-bold hover:underline">Help Requests</a>
 
-            <form onSubmit={handleCreateTeam} className="mb-6 p-4 bg-white shadow rounded">
+        </nav>
+        <button 
+          onClick={() => { localStorage.removeItem("token"); navigate("/login"); }}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+        >
+          Logout
+        </button>
+      </header>
+      <div className="max-w-4xl mx-auto mt-8 p-4">
+            <h2 className="text-2xl font-bold mb-4 text-indigo-700">Teams</h2>
+
+            <form onSubmit={handleCreateTeam} className="bg-teal-200 mb-6 p-4 shadow rounded">
                 <input
                     type="text"
                     placeholder="Team Name"
@@ -166,6 +188,8 @@ const Teams = () => {
                 </div>
             )}
         </div>
+    </div>
+        
     );
 };
 

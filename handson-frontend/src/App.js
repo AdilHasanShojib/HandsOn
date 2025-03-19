@@ -11,6 +11,7 @@ import Messaging from "./components/Messaging";
 import Teams from "./components/Teams";
 import TeamDashboard from "./components/TeamDashboard";
 import TeamInvites from "./components/TeamInvites";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
       <Routes>
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/events" element={<EventList />} />
         <Route path="/events/:id" element={<EventDetails />} />

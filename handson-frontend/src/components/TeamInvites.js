@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { fetchUserInvites, acceptInvite, declineInvite } from "../api";
+import { useNavigate } from "react-router-dom";
 
 const TeamInvites = () => {
     const [invites, setInvites] = useState([]);
+    const navigate = useNavigate();
+
 
     useEffect(() => {
         loadInvites();
@@ -28,9 +31,28 @@ const TeamInvites = () => {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
-        <div className="w-full max-w-md bg-white shadow-lg rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Team Invites</h2>
+        <div className="min-h-screen bg-gray-100">
+      {/* Navbar */}
+      <header className="bg-indigo-600 p-4 text-white flex justify-between items-center shadow-md">
+        <h1 className="text-3xl font-bold">HandsOn</h1>
+        <nav className="space-x-6">
+        <a href="/dashboard" className="font-bold hover:underline">Home</a>
+       <a href="/teams" className="font-bold hover:underline">Teams</a>
+       <a href="/teams-invites" className="font-bold hover:underline">Invite</a>
+       <a href="/events" className="font-bold hover:underline">Events</a>
+       <a href="/help-request" className="font-bold hover:underline">Help Requests</a>
+
+        </nav>
+        <button 
+          onClick={() => { localStorage.removeItem("token"); navigate("/login"); }}
+          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md transition"
+        >
+          Logout
+        </button>
+      </header>
+      <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="w-full max-w-md bg-teal-200 shadow-lg rounded-lg p-6">
+            <h2 className="text-2xl font-bold mb-4 text-indigo-700 text-center">Team Invites</h2>
             {invites.length > 0 ? (
                 invites.map((invite) => (
                     <div key={invite.id} className="border rounded-lg p-4 my-3 bg-gray-50">
@@ -58,6 +80,8 @@ const TeamInvites = () => {
             )}
         </div>
        </div>
+    </div>
+        
     );
 };
 
