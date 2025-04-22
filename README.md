@@ -54,7 +54,6 @@ Public and private team membership
 
 Team dashboard displaying team activities
 
-Leaderboard showcasing top teams
 
 ✅ Messaging System
 
